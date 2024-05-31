@@ -1,0 +1,136 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: 0;
+}
+
+html {
+    font-size: 10px;
+    color: gray;
+}
+
+body {
+    min-height: 100vh;
+    font-size: 1.6rem;
+}
+
+main {
+    width: 70%;
+    margin: 0 auto;
+    text-align: center;
+    min-height: calc(100vh - 50px - 300px);
+}
+
+header {
+    height: 50px;
+    border-bottom: 1px solid lightgray;
+    position: sticky;
+}
+
+footer {
+    background-color: #ddeeff;
+    height: 299px;
+}
+
+.flex {
+    display: flex;
+}
+
+.t-left {
+    text-align: left;
+}
+
+.t-right {
+    text-align: right;
+}
+
+.t-center {
+    text-align: center;
+}
+
+.j-left {
+    justify-content: left;
+}
+
+.j-right {
+    justify-content: right;
+}
+
+.j-center {
+    justify-content: center;
+}
+
+.j-between {
+    justify-content: space-between;
+}
+
+.ai-center {
+    align-items: center;
+}
+
+.cursor-pointer {
+    cursor: pointer;
+}
+
+.mt10 {
+    margin-top: 10px;
+}
+
+.mt20 {
+    margin-top: 20px;
+}
+
+.input-box {
+    text-align: left;
+}
+
+input[type=text],
+input[type=password],
+input[type=email],
+textarea {
+    padding-top: 10px;
+    padding-bottom: 10px;
+    padding-left: 10px;
+    padding-right: 10px;
+    border-radius: 10px;
+    border: 1px solid lightgray;
+    background-color: azure;
+    width: 91%;
+}
+
+textarea {
+    resize: none;
+}
+
+input[type=text]:focus,
+input[type=password]:focus,
+input[type=email]:focus,
+textarea:focus {
+    outline: none;
+}
+
+button,
+input[tyoe=button],
+input[tyoe=submit] {
+    background-color: pink;
+    border-radius: 10px;
+    padding-left: 30px;
+    padding-right: 30px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    border: 1px solid lightpink;
+    width: 100%;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.input-label {
+    color: lightgray;
+    font-size: 0.8rem;
+}
+
+a {
+    font-size: 1rem;
+    color: rgb(20, 188, 188);
+}

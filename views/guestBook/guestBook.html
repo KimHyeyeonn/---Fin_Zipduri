@@ -1,0 +1,360 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<link rel="stylesheet" href="/assets/css/guestBook.css">
+<script>
+
+    let g_comments = [];
+
+    const createComments = (commentListBox, comments) => {
+        for (let item of comments) {
+            const newDiv = document.createElement('div');
+            newDiv.className = "commentLine mt10";
+            const str = `
+                <div>
+                    <div class="flex j-between">
+                        <div style="color: #ff64e3; font-size: 0.9rem">${item.createUserName}</div>
+                        <div style="font-size: 0.9rem">${item.updateDate.toString().split('T')[0].replaceAll('-', '/')}</div>
+                    </div>
+                </div>
+                <div style="font-size: 0.9rem;">
+                    ${item.content}
+                </div>
+            `;
+            newDiv.innerHTML = str;
+            commentListBox.append(newDiv);
+        }
+    }
+
+    const onClickMenu = (id) => {
+        document.querySelector(`.menu${id}`).style.display = 'block';
+    }
+
+    const clickBodyEvent = (event) => {
+
+        const target = event.target;
+
+        const menu = event.currentTarget.querySelectorAll(".menu");
+        const menu_btn_icon = event.currentTarget.querySelectorAll(".menu-btn-icon")
+
+        for (let item of menu) {
+            if(target === item) {
+                return ;
+            }
+        }
+
+        for (let item of menu_btn_icon) {
+            if(target === item) {
+                return ;
+            }
+
+            if (target === item.firstChild) {
+                return;
+            }
+        }
+
+        for (let item of menu) {
+            item.style.display = "none";
+        }
+
+    }
+
+    const body = document.querySelector("body");
+    body.addEventListener('click', clickBodyEvent);
+
+    const onClickDelete = async (url) => {
+
+        const response = await fetch(url, 
+            { 
+                method: 'delete',
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            }).then(res => {
+                if (res.status === 200) {
+                    window.location.href = `http://${location.host}${location.pathname}`;
+                }
+            }).catch(error => console.log(error));
+
+    }
+
+    const onClickApproval = async (id) => {
+
+        await fetch(`/guestBook/approval/${id}`, 
+            { 
+                method: 'put',
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            }).then(res => {
+                if (res.status === 200) {
+                    window.location.href = `http://${location.host}${location.pathname}`;
+                }
+            }).catch(error => console.log(error));
+    }
+
+    const onClickLike = async (isLike, id, userId) => {
+        
+        const notLike = document.querySelector(`.not-like${id}`);
+        const like = document.querySelector(`.like${id}`);
+
+        if (isLike) {
+            notLike.style.display = 'none';
+            like.style.display = 'inline';
+        } else {
+            notLike.style.display = 'inline';
+            like.style.display = 'none';
+        }
+
+        await fetch(`/like/${id}`, {
+            method: isLike ? 'post' : 'delete',
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                likeUser: userId
+            })
+        }).then(res => {
+
+            if (res.status === 200) {
+                const likeCnt = document.querySelector(`.likeCnt${id}`);
+
+                if (isLike) {
+                    likeCnt.innerHTML = parseInt(likeCnt.innerHTML) + 1;
+                } else {
+                    likeCnt.innerHTML = parseInt(likeCnt.innerHTML) - 1;
+                }
+            }
+
+        }).catch(error => console.log(error));
+    }
+
+    const onClickCommentsBtn = (guestBookId) => {
+        const commentBox = document.querySelector(`.commentBox${guestBookId}`);
+        
+        commentBox.style.height = `130px`;
+    }
+
+    const onClickCloseComment = (guestBookId) => {
+        const commentBox = document.querySelector(`.commentBox${guestBookId}`);
+
+        commentBox.style.height = `0px`;
+    }
+
+    const onClickWriteComments = async (guestBookId, userId, userName) => {
+
+        const comment = document.querySelector(`#comments${guestBookId}`);
+
+        if (!comment.value) {
+            return;
+        }
+
+        const commentValue = comment.value;
+
+        await fetch(`/comments`, {
+            method: 'post',
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                createUser: userId,
+                createUserName: userName,
+                content: commentValue,
+                comments: guestBookId
+            })
+        }).then(res => {
+
+            if (res.status === 200) {
+                alert('댓글을 등록하였습니다.');
+
+                const commentBox = document.querySelector(`.commentBox${guestBookId}`);
+                const commentCnt = document.querySelector(`.commentCnt${guestBookId}`);
+                comment.value = '';
+                commentBox.style.height = `0px`;
+                commentCnt.innerHTML = parseInt(commentCnt.innerHTML) + 1;
+
+                const commentListBox = 
+                    document.querySelector(`.commentList${guestBookId} > div`);
+                
+                const children = commentListBox.children;
+
+                if (!children) {
+                    return;
+                }
+
+                const date = new Date();
+                const year = date.getFullYear();
+                let month = date.getMonth() + 1;
+                month = month.toString().length === 1 ? `0${month}` : month;
+                let day = date.getDate();
+                day = day.toString().length === 1 ? `0${day}` : day;
+
+                const newDiv = document.createElement('div');
+                newDiv.className = "commentLine mt10";
+                const str = `
+                    <div>
+                        <div class="flex j-between">
+                            <div style="color: #ff64e3; font-size: 0.9rem">${userName}</div>
+                            <div style="font-size: 0.9rem">${year}/${month}/${day}</div>
+                        </div>
+                    </div>
+                    <div style="font-size: 0.9rem;">
+                        ${commentValue}
+                    </div>
+                `;
+                newDiv.innerHTML = str;
+                
+                commentListBox.prepend(newDiv);
+
+            }
+
+        }).catch(error => console.log(error));
+    }
+
+    const onClickViewComment = async (guestBookId) => {
+        
+        const commentListBox = 
+                document.querySelector(`.commentList${guestBookId} > div`);
+
+        const commentLine = document.querySelectorAll('.commentLine');
+
+        if (commentListBox.style.display === 'block') {
+            for (let item of commentLine) {
+                item.remove();
+            }
+            commentListBox.style.display = 'none';
+            return;
+        }
+
+        const res = await axios.get(`/comments/${guestBookId}`)
+        
+        try {
+            
+            if (res.status === 200) {
+
+                for (let item of commentLine) {
+                    item.remove();
+                }
+
+                const comments = res.data.result;
+                g_comments = [...comments];
+
+                commentListBox.style.display = 'block';
+                createComments(commentListBox, comments);
+
+            }
+        } catch (error) {
+            console.log(error);
+        }
+
+    }
+</script>
+<div class="guestBook">
+    <div>
+        <div class="flex j-right">
+            <div>
+                <a href="/guestBook/write/{{ id }}">
+                    <button>방명록 쓰기</button>
+                </a>
+            </div>
+        </div>
+        {% for item in guestBookList %}
+            <div class="mt10" style="border: 1px solid lightgray;">
+                <div style="padding: 10px" class="flex j-between ai-center">
+                    <!-- 글쓴이 -->
+                    <div>
+                        글쓴이: {{ item.createUserName }}
+                    </div>
+                    <!-- 메뉴버튼 -->
+                    <div class="menu-btn" onclick="onClickMenu('{{item.id}}')">
+                        <svg class="menu-btn-icon" style="width: 5px; fill: gray;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 512"><path d="M64 360a56 56 0 1 0 0 112 56 56 0 1 0 0-112zm0-160a56 56 0 1 0 0 112 56 56 0 1 0 0-112zM120 96A56 56 0 1 0 8 96a56 56 0 1 0 112 0z"/></svg>
+                        <div class="menu menu{{item.id}}">
+                            <div>
+                                {% if item.status == '0' %}
+                                <div class="menu-item" onClick="onClickApproval('{{item.id}}')">승인</div>
+                                <div class="menu-item" onclick="onClickDelete('/guestBook/{{item.id}}')">거절</div>
+                                {% endif %}
+                                {% if item.createUser == user.id %}
+                                <div class="menu-item" onClick="javascript:window.location.href='/guestBook/{{item.id}}/update'">
+                                    수정
+                                </div>
+                                {% endif %}
+                                {% if item.guestBook == user.id or item.createUser == user.id %}
+                                
+                                <div class="menu-item" onclick="onClickDelete('/guestBook/{{item.id}}')">
+                                    삭제
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- 사진 또는 동영상 -->
+                <div style="border: 1px solid lightgray; height: 500px;">
+                    <img 
+                        style="width: 100%; height: 100%; object-fit: cover;"
+                        src="{{item.imgPath}}"
+                    >
+                </div>
+                <div style="padding: 10px;" class="t-left">
+                    <!-- 좋아요 -->
+                    <svg onClick="onClickLike(false, '{{item.id}}', '{{ user.id }}')" class="like{{item.id}} cursor-pointer likeFlg{{item.likeFlg !== null}}" style="width: 20px; fill: red;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M47.6 300.4L228.3 469.1c7.5 7 17.4 10.9 27.7 10.9s20.2-3.9 27.7-10.9L464.4 300.4c30.4-28.3 47.6-68 47.6-109.5v-5.8c0-69.9-50.5-129.5-119.4-141C347 36.5 300.6 51.4 268 84L256 96 244 84c-32.6-32.6-79-47.5-124.6-39.9C50.5 55.6 0 115.2 0 185.1v5.8c0 41.5 17.2 81.2 47.6 109.5z"/></svg>
+                    <svg onClick="onClickLike(true, '{{item.id}}', '{{ user.id }}')" class="not-like{{item.id}} cursor-pointer likeFlg{{item.likeFlg === null}}" style="width: 20px;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M225.8 468.2l-2.5-2.3L48.1 303.2C17.4 274.7 0 234.7 0 192.8v-3.3c0-70.4 50-130.8 119.2-144C158.6 37.9 198.9 47 231 69.6c9 6.4 17.4 13.8 25 22.3c4.2-4.8 8.7-9.2 13.5-13.3c3.7-3.2 7.5-6.2 11.5-9c0 0 0 0 0 0C313.1 47 353.4 37.9 392.8 45.4C462 58.6 512 119.1 512 189.5v3.3c0 41.9-17.4 81.9-48.1 110.4L288.7 465.9l-2.5 2.3c-8.2 7.6-19 11.9-30.2 11.9s-22-4.2-30.2-11.9zM239.1 145c-.4-.3-.7-.7-1-1.1l-17.8-20c0 0-.1-.1-.1-.1c0 0 0 0 0 0c-23.1-25.9-58-37.7-92-31.2C81.6 101.5 48 142.1 48 189.5v3.3c0 28.5 11.9 55.8 32.8 75.2L256 430.7 431.2 268c20.9-19.4 32.8-46.7 32.8-75.2v-3.3c0-47.3-33.6-88-80.1-96.9c-34-6.5-69 5.4-92 31.2c0 0 0 0-.1 .1s0 0-.1 .1l-17.8 20c-.3 .4-.7 .7-1 1.1c-4.5 4.5-10.6 7-16.9 7s-12.4-2.5-16.9-7z"/></svg>
+                    <!-- 댓글쓰기 버튼 -->
+                    <svg onClick="onClickCommentsBtn('{{item.id}}')" class="cursor-pointer" style="margin-left: 5px; width: 20px;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M123.6 391.3c12.9-9.4 29.6-11.8 44.6-6.4c26.5 9.6 56.2 15.1 87.8 15.1c124.7 0 208-80.5 208-160s-83.3-160-208-160S48 160.5 48 240c0 32 12.4 62.8 35.7 89.2c8.6 9.7 12.8 22.5 11.8 35.5c-1.4 18.1-5.7 34.7-11.3 49.4c17-7.9 31.1-16.7 39.4-22.7zM21.2 431.9c1.8-2.7 3.5-5.4 5.1-8.1c10-16.6 19.5-38.4 21.4-62.9C17.7 326.8 0 285.1 0 240C0 125.1 114.6 32 256 32s256 93.1 256 208s-114.6 208-256 208c-37.1 0-72.3-6.4-104.1-17.9c-11.9 8.7-31.3 20.6-54.3 30.6c-15.1 6.6-32.3 12.6-50.1 16.1c-.8 .2-1.6 .3-2.4 .5c-4.4 .8-8.7 1.5-13.2 1.9c-.2 0-.5 .1-.7 .1c-5.1 .5-10.2 .8-15.3 .8c-6.5 0-12.3-3.9-14.8-9.9c-2.5-6-1.1-12.8 3.4-17.4c4.1-4.2 7.8-8.7 11.3-13.5c1.7-2.3 3.3-4.6 4.8-6.9c.1-.2 .2-.3 .3-.5z"/></svg>
+                </div>
+                <!-- 좋아요 수 -->
+                <div style="padding: 10px;" class="t-left"><span style="font-weight: bold;" class="likeCnt{{item.id}}">
+                    {{ item.likeCnt }}</span> 명이 좋아합니다
+                </div>
+                <!-- 내용 -->
+                <div style="padding: 10px" class="t-left">
+                    {{ item.comment }}
+                </div>
+                <div style="color: gray; padding: 10px; font-size: 0.7rem" class="t-left cursor-pointer" onClick="onClickViewComment('{{item.id}}')">
+                    댓글<span class="commentCnt{{item.id}}">{{ item.commentCnt }}</span>개 보기
+                </div>
+
+                <div class="commentListBox commentList{{item.id}}">
+                    <div class="t-left" style="padding-left: 10px; padding-right: 10px; display: none">
+
+                    </div>
+                </div>
+
+                <div class="commentBox commentBox{{item.id}}">
+                    <div class="t-left" style="padding: 15px">
+                        <div class="flex j-between ai-center">
+                            <div>
+                                <label class="input-label">댓글 쓰기</label>
+                            </div>
+                            <div>
+                                <button
+                                    style="font-size: 0.7rem; padding: 5px;"
+                                    onClick="onClickWriteComments('{{item.id}}', '{{user.id}}', '{{user.name}}')"
+                                >
+                                    댓글 등록
+                                </button>
+                            </div>
+                        </div>
+                        <div>
+                            <textarea id="comments{{item.id}}" class="mt10" style="width: 95%;"></textarea>
+                        </div>
+                        <div class="flex j-right">
+                            <div 
+                                style="font-size: 0.8rem;"
+                                class="cursor-pointer"
+                                onclick="onClickCloseComment('{{item.id}}')"
+                            >
+                                닫기
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div style="padding: 10px" class="t-left">
+                    작성일: {{ item.createDate.toLocaleString('ko-KR', { timeZone: 'UTC' }) }}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

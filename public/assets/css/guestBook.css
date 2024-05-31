@@ -1,0 +1,62 @@
+.guestBook {
+    width: 50%;
+    margin: 0 auto;
+    padding-top: 30px;
+    padding-bottom: 30px;
+}
+
+.menu-btn {
+    padding: 10px;
+    position: relative;
+}
+
+.menu-btn-icon {
+    cursor: pointer;
+}
+
+.menu-btn-icon:hover {
+    background-color: white;
+    opacity: 0.4;
+}
+
+.menu {
+    position: absolute;
+    display: none;
+    border: 1px solid lightgray;
+    border-radius: 10px;
+    font-size: 1rem;
+    text-align: left;
+    overflow: hidden;
+}
+
+.menu-item {
+    min-width: 70px;
+    background-color: white;
+    top: 0;
+    left: 50%;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    padding-left: 10px;
+    border-bottom: 1px solid lightgray;
+    cursor: pointer;
+}
+
+.menu-item:hover {
+    background-color: lightgray;
+}
+
+.likeFlgtrue {
+    display: inline;
+}
+
+.likeFlgfalse {
+    display: none;
+}
+
+.commentBox {
+    height: 0px;
+    border-top: 1px solid lightgray;
+    border-bottom: 1px solid lightgray;
+    overflow: hidden;
+    transition: 0.8s;
+}

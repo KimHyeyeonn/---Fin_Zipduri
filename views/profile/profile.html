@@ -1,0 +1,103 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<script>
+
+    let img = null;
+
+    const onClickCamera = () => {
+        const file_btn = document.querySelector('.file_btn');
+        file_btn.click();
+    }
+
+    const setThumbnail = (event) => {
+        var reader = new FileReader();
+        console.log(event);
+        reader.onload = function(event) {
+            const defaultUmg = document.querySelector(".photoArea > img");
+            if (defaultUmg) {
+                defaultUmg.remove();
+            }
+            var img = document.createElement("img");
+            img.className = 'img';
+            img.setAttribute("src", event.target.result);
+            document.querySelector(".photoArea").appendChild(img);
+            document.querySelector('.photoButtonArea').style.display = "none";
+        };
+
+        img = event.target.files[0];
+        reader.readAsDataURL(event.target.files[0]);
+    }
+
+</script>
+<link rel="stylesheet" href="/assets/css/profile.css">
+<form 
+    action="/profile/{{user.id}}"
+    method="post"
+    enctype="multipart/form-data"
+    style="padding-top: 30px; padding-bottom: 30px;"
+>
+    <div>
+        <div class="profileBox flex">
+            <div style="width: 60%; border-right: 1px solid lightgrey;" class="flex ai-center j-center">
+                <div style="width: 100%;" class="cursor-pointer" onClick="onClickCamera()">
+                    {% if user.homeImagePath %}
+                    <div style="display: none;" class="photoButtonArea">
+                    {% else %}
+                    <div class="photoButtonArea">
+                    {% endif %}
+                        <svg style="width: 50px; fill: rgb(236, 93, 117)" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M149.1 64.8L138.7 96H64C28.7 96 0 124.7 0 160V416c0 35.3 28.7 64 64 64H448c35.3 0 64-28.7 64-64V160c0-35.3-28.7-64-64-64H373.3L362.9 64.8C356.4 45.2 338.1 32 317.4 32H194.6c-20.7 0-39 13.2-45.5 32.8zM256 192a96 96 0 1 1 0 192 96 96 0 1 1 0-192z"/></svg>
+                        <div>
+                            <span>사진을 선택해 주세요</span>
+                        </div>
+                    </div>
+                    <div class="photoArea">
+                        {% if user.homeImagePath %}
+                            <img class="img" src="{{ user.homeImagePath }}">
+                        {% endif %}
+                    </div>
+                    <input name="img" class="file_btn" style="display: none;" type="file" onchange="setThumbnail(event);"/>
+                </div>
+            </div>
+            <div style="width: 40%; padding: 20px;">
+                <div>
+                    <div class="input-box">
+                        <div><label class="input-label">이메일</label></div>
+                        <input style="width: 70%;" type="text" value="{{ user.username }}" readonly/>
+                    </div>
+                </div>
+                <div>
+                    <div class="input-box">
+                        <div><label class="input-label">이름</label></div>
+                        <input style="width: 70%;" name="name" type="text" value="{{ user.name }}" readonly/>
+                    </div>
+                </div>
+                <div>
+                    <div class="input-box">
+                        <div><label class="input-label">집 이름</label></div>
+                        <input style="width: 70%;" name="homeName" type="text" value="{{ user.homeName }}" />
+                    </div>
+                    <div class="input-box">
+                        <div><label class="input-label">집 소개</label></div>
+                        <textarea style="width: 70%;" name="homeComment" rows="4">{{ user.homeComment }}</textarea>
+                    </div>
+                    <div class="input-box">
+                        <div><label class="input-label">등록 날짜</label></div>
+                        <input style="width: 70%;" type="text" value="{{ user.createDate.toLocaleString('ko-KR') }}" readonly />
+                    </div>
+                    <div class="input-box">
+                        <div><label class="input-label">업데이트 날짜</label></div>
+                        <input style="width: 70%;" type="text" value="{{ user.updateDate.toLocaleString('ko-KR') }}" readonly/>
+                    </div>
+                    <div class="flex j-left">
+                        <button style="width: 50%;" class="mt10">패스워드 변경</button>
+                    </div>
+                    <div class="flex j-right mt10">
+                        <button style="width: 30%" type="submit">저장</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+{% endblock %}

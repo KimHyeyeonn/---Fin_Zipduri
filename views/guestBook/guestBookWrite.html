@@ -1,0 +1,84 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<link rel="stylesheet" href="/assets/css/guestBookWrite.css">
+<script>
+    
+    const onClickCamera = () => {
+        const file_btn = document.querySelector('.file_btn');
+        file_btn.click();
+    }
+
+    const setThumbnail = (event) => {
+        var reader = new FileReader();
+        console.log(event);
+        reader.onload = function(event) {
+            const defaultUmg = document.querySelector(".photoArea > img");
+            if (defaultUmg) {
+                defaultUmg.remove();
+            }
+            var img = document.createElement("img");
+            img.className = 'img';
+            img.setAttribute("src", event.target.result);
+            document.querySelector(".photoArea").appendChild(img);
+            document.querySelector('.photoButtonArea').style.display = "none";
+        };
+
+        reader.readAsDataURL(event.target.files[0]);
+    }
+
+</script>
+{% if guestBook %}
+<form action="/guestBook/{{id}}/update" method="post" enctype="multipart/form-data">
+{% else %}
+<form action="/guestBook/{{id}}" method="post" enctype="multipart/form-data">
+{% endif %}
+    <!-- <input type="text" value="{{id}}" readonly/> -->
+    <div style="padding-top: 30px">
+        <div class="guestBook-top flex j-between ai-center">
+            <div class="back" class="cursor-pointer">
+                <a href="javascript:history.back()">
+                    <svg style="width: 20px; fill:rgb(236, 93, 117)" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.4.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc. --><path d="M512 256A256 256 0 1 0 0 256a256 256 0 1 0 512 0zM271 135c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9l-87 87 87 87c9.4 9.4 9.4 24.6 0 33.9s-24.6 9.4-33.9 0L167 273c-9.4-9.4-9.4-24.6 0-33.9L271 135z"/></svg>
+                </a>
+            </div>
+            <div class="title">방명록 남기기</div>
+            <div class="write-btn">
+                <button type="submit">등록</button>
+            </div>
+        </div>
+        <div style="border: 1px solid lightgray;" class="flex">
+            <div style="width: 60%; height: 300px; border-right: 1px solid lightgray;">
+                <div style="height: 100%;" class="photo flex ai-center j-center">
+                    <div style="width: 100%;" class="cursor-pointer" onClick="onClickCamera()">
+                        {% if guestBook %}
+                        <div style="display: none;" class="photoButtonArea">
+                        {% else %}
+                        <div class="photoButtonArea">
+                        {% endif %}
+                            <svg style="width: 50px; fill: rgb(236, 93, 117)" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.4.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc. --><path d="M149.1 64.8L138.7 96H64C28.7 96 0 124.7 0 160V416c0 35.3 28.7 64 64 64H448c35.3 0 64-28.7 64-64V160c0-35.3-28.7-64-64-64H373.3L362.9 64.8C356.4 45.2 338.1 32 317.4 32H194.6c-20.7 0-39 13.2-45.5 32.8zM256 192a96 96 0 1 1 0 192 96 96 0 1 1 0-192z"/></svg>
+                            <div>
+                                <span>사진을 선택해 주세요</span>
+                            </div>
+                        </div>
+                        <div class="photoArea">
+                            {% if guestBook %}
+                            <img class="img" src="{{ guestBook.dataValues.imgPath }}">
+                            {% endif %}
+                        </div>
+                        <input name="img" class="file_btn" style="display: none;" type="file" onchange="setThumbnail(event);"/>
+                    </div>
+                </div>
+            </div>
+            <div style="padding: 10px; width: 40%;">
+                <div>
+                    <div class="input-box">
+                        <label class="input-label">방명록</label>
+                        <textarea name="comment" style="resize: none; width: 95%;" rows="15">{% if guestBook %}{{ guestBook.dataValues.comment }}{% endif %}</textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+{% endblock %}

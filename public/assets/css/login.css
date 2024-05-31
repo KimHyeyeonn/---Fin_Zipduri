@@ -1,0 +1,11 @@
+.login-div {
+    height: calc(100vh - 50px - 300px);
+    width: 100%;
+}
+
+.kakao_btn {
+    background-color: #FEE500;
+    color: #000000;
+    border-radius: 5px;
+    border: 1px solid #FEE500;
+}
